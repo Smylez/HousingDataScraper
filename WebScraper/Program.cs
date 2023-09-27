@@ -8,6 +8,8 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using static System.Net.WebRequestMethods;
+using System.Resources;
+using WebScraper;
 
 class Program
 {
@@ -22,20 +24,20 @@ class Program
 
         Console.WriteLine("Please enter the city:");
         locationInput = Console.ReadLine();
-
-        //Hardcoding these values for now, not sure how Kijiji generates them but they're location specific
-        if (locationInput.ToUpper() == "FREDERICTON")
-        {
-            locationKey = "c37l1700018";
-        }
-        if (locationInput.ToUpper() == "MONCTON")
-        {
-            locationKey = "c37l1700001";
-        }
-        else
-        {
-            locationKey = "";
-        }
+        locationKey = Locations.ResourceManager.GetString(locationInput.ToUpper());
+        ////Hardcoding these values for now, not sure how Kijiji generates them but they're location specific
+        //if (locationInput.ToUpper() == "FREDERICTON")
+        //{
+        //    locationKey = "c37l1700018";
+        //}
+        //if (locationInput.ToUpper() == "MONCTON")
+        //{
+        //    locationKey = "c37l1700001";
+        //}
+        //else
+        //{
+        //    locationKey = "";
+        //}
 
         Console.WriteLine("Please the number of bedrooms between 1 & 4, enter 0 for bachelor/studio:");
         roomsInput = Console.ReadLine();
