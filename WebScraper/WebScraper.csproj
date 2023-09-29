@@ -43,6 +43,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Locations.resx</DependentUpon>
     </Compile>
+    <Compile Include="Categories.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Categories.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="EPPlus, Version=6.2.9.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
@@ -111,6 +116,10 @@
     <EmbeddedResource Include="Locations.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Locations.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Categories.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Categories.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
