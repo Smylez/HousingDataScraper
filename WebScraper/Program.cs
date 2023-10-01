@@ -16,12 +16,8 @@ class Program
 {
     static async System.Threading.Tasks.Task Main(string[] args)
     {
-        //TODO - move these to where they're actually used instead of all at the top
         string filePath = "C:\\Users\\Flip\\Downloads";
         string baseURL = "https://www.kijiji.ca";
-        string cardUrl;
-        bool isFiltered;
-        int pageScrapeDelaytimer = 1000;
 
         Console.WriteLine("Please enter the city:");
         string locationInput = Console.ReadLine();
@@ -67,113 +63,122 @@ class Program
             try
             {
                 //Fake the user agent
-                string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";          
+                string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
                 client.DefaultRequestHeaders.Add("User-Agent", userAgent);
-                
-                ///pagination start
-                //Get the html
-                //only gets first page, need to find a way to know how many pages of results are there in advance
-                string html = await client.GetStringAsync(filteredUrl);
-                var doc = new HtmlDocument();
-                doc.LoadHtml(html);
 
-                //Find the main container that holds all the listing cards.
-                string listingContainerNodeString = "//ul[@data-testid='srp-search-list']";              
-                var listingContainer = doc.DocumentNode.SelectSingleNode(listingContainerNodeString);
-                if (listingContainer != null)
+                //Create a list to store the scraped data.
+                var scrapedData = new List<(string price, string location, string postingDate, string listingDetailsURL, string address)>();
+                string paginationNodeString = "//li[@data-testid='pagination-next-link']";
+                bool lastpage = false;
+                do 
                 {
-                    //Find all the listing cards within the container.
-                    string listingCardNodeString = ".//li[starts-with(@data-testid, 'listing-card-list-item-')]";
-                    var listingCards = listingContainer.SelectNodes(listingCardNodeString);
+                    //Get the html
+                    string html = await client.GetStringAsync(filteredUrl);
+                    var doc = new HtmlDocument();
+                    doc.LoadHtml(html);
 
-                    if (listingCards != null)
+                    //Find the main container that holds all the listing cards.
+                    string listingContainerNodeString = "//ul[@data-testid='srp-search-list']";
+                    var listingContainer = doc.DocumentNode.SelectSingleNode(listingContainerNodeString);
+                    if (listingContainer != null)
                     {
-                        //Create a list to store the scraped data.
-                        var scrapedData = new List<(string price, string location, string postingDate, string listingDetailsURL, string address)>();
+                        //Find all the listing cards within the container.
+                        string listingCardNodeString = ".//li[starts-with(@data-testid, 'listing-card-list-item-')]";
+                        var listingCards = listingContainer.SelectNodes(listingCardNodeString);
 
-                        foreach (var card in listingCards)
+                        if (listingCards != null)
                         {
-                            //Extract listing price and location.
-                            string priceNodeString = ".//p[@data-testid='listing-price']";
-                            var priceNode = card.SelectSingleNode(priceNodeString);
-                            string locationNodeString = ".//p[@data-testid='listing-location']";
-                            var locationNode = card.SelectSingleNode(locationNodeString);
-                            string price = priceNode?.InnerText.Trim() ?? "N/A";
-                            string location = locationNode?.InnerText.Trim() ?? "N/A";
-
-                            //Link to details page
-                            string listingDetailsURLNodeString = ".//a[@data-testid='listing-link']";
-                            var listingDetailsURLNode = card.SelectSingleNode(listingDetailsURLNodeString);
-                            string listingDetailsURL = baseURL + listingDetailsURLNode?.GetAttributeValue("href", string.Empty);
-
-                            //Navigate to each card to get address info
-                            //Add 500 ms delay here to prevent ban detection
-                            await Task.Delay(500);
-                            string detailsHTML = await client.GetStringAsync(listingDetailsURL);
-                            var detailsDoc = new HtmlDocument();
-                            detailsDoc.LoadHtml(detailsHTML);
-
-                            //Get address and posting date
-                            var detailsContainer = detailsDoc.DocumentNode.SelectSingleNode("//div[@id='mainPageContent']");
-                            string addressNodeString = "//div[contains(@class, 'locationContainer-')]//span[@itemprop='address']";
-                            var addressNode = detailsContainer.SelectSingleNode(addressNodeString);
-                            string postingDateNodeString = "//div[contains(@class, 'datePosted-')]";
-                            var postingDateNode = detailsContainer.SelectSingleNode(postingDateNodeString);
-                            string address = addressNode?.InnerText.Trim() ?? "N/A";
-
-                            //Alternate markers
-                            //string startMarker = "datetime=\"";
-                            //string endMarker = "Z\" title";
-
-                            //Posting date substring manipulation
-                            string startMarker = "title=\"";
-                            string endMarker = "\">";
-                            string postingDate = "N/A";
-                            //detects ads that have been taken down recently, this can cause an exception
-                            if (postingDateNode != null)
+                            foreach (var card in listingCards)
                             {
-                                int startIndex = postingDateNode.InnerHtml.IndexOf(startMarker);
-                                //Get endof index position to start
-                                startIndex = startIndex + startMarker.Length;
-                                //Get positon to end the substring
-                                int endIndex = postingDateNode.InnerHtml.IndexOf(endMarker, startIndex);
-                                // Calculate the length of the datetime string to return
-                                int datetimeLength = endIndex - startIndex;
-                                
-                                if (datetimeLength > 0)
+                                //Extract listing price and location.
+                                string priceNodeString = ".//p[@data-testid='listing-price']";
+                                var priceNode = card.SelectSingleNode(priceNodeString);
+                                string locationNodeString = ".//p[@data-testid='listing-location']";
+                                var locationNode = card.SelectSingleNode(locationNodeString);
+                                string price = priceNode?.InnerText.Trim() ?? "N/A";
+                                string location = locationNode?.InnerText.Trim() ?? "N/A";
+
+                                //Link to details page
+                                string listingDetailsURLNodeString = ".//a[@data-testid='listing-link']";
+                                var listingDetailsURLNode = card.SelectSingleNode(listingDetailsURLNodeString);
+                                string listingDetailsURL = baseURL + listingDetailsURLNode?.GetAttributeValue("href", string.Empty);
+
+                                //Navigate to each card to get address info
+                                //Add 500 ms delay here to prevent ban detection
+                                await Task.Delay(500);
+                                string detailsHTML = await client.GetStringAsync(listingDetailsURL);
+                                var detailsDoc = new HtmlDocument();
+                                detailsDoc.LoadHtml(detailsHTML);
+
+                                //Get address and posting date
+                                var detailsContainer = detailsDoc.DocumentNode.SelectSingleNode("//div[@id='mainPageContent']");
+                                string addressNodeString = "//div[contains(@class, 'locationContainer-')]//span[@itemprop='address']";
+                                var addressNode = detailsContainer.SelectSingleNode(addressNodeString);
+                                string postingDateNodeString = "//div[contains(@class, 'datePosted-')]";
+                                var postingDateNode = detailsContainer.SelectSingleNode(postingDateNodeString);
+                                string address = addressNode?.InnerText.Trim() ?? "N/A";
+
+                                //Alternate markers
+                                //string startMarker = "datetime=\"";
+                                //string endMarker = "Z\" title";
+
+                                //Posting date substring manipulation
+                                string startMarker = "title=\"";
+                                string endMarker = "\">";
+                                string postingDate = "N/A";
+                                //detects ads that have been taken down recently, this can cause an exception
+                                if (postingDateNode != null)
                                 {
-                                    // Extract the datetime value
-                                    postingDate = postingDateNode?.InnerHtml.Substring(startIndex, datetimeLength).Trim() ?? "N/A";
+                                    int startIndex = postingDateNode.InnerHtml.IndexOf(startMarker);
+                                    //Get endof index position to start
+                                    startIndex = startIndex + startMarker.Length;
+                                    //Get positon to end the substring
+                                    int endIndex = postingDateNode.InnerHtml.IndexOf(endMarker, startIndex);
+                                    // Calculate the length of the datetime string to return
+                                    int datetimeLength = endIndex - startIndex;
+
+                                    if (datetimeLength > 0)
+                                    {
+                                        // Extract the datetime value
+                                        postingDate = postingDateNode?.InnerHtml.Substring(startIndex, datetimeLength).Trim() ?? "N/A";
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                postingDate = "Taken Down";
-                            }
-                            scrapedData.Add((price, location, postingDate, listingDetailsURL, address));
+                                else
+                                {
+                                    postingDate = "Taken Down";
+                                }
+                                scrapedData.Add((price, location, postingDate, listingDetailsURL, address));
+                            }                         
                         }
-                        //TODO - add pagination before export call, add 1000ms delay before each page scrape to mimic reasonable user input
-                        /*  const firstResultPageURL = await this.getFirstResultPageURL(params);
-
-                        // Specify page number. It must be the last path component of the URL
-                        const url = firstResultPageURL.replace(LOCATION_REGEX, `$1/page-${pageNum}$2`);
-                        
-                         isLastPage: body.indexOf("pagination-next-link") === -1*/
-
-                        //Export the scraped data to an Excel file.
-                        ExportToExcel(scrapedData, filePath+"\\ScrapedData.xlsx", roomsInput);
+                        else
+                        {
+                            Console.WriteLine("No listing cards found on the page.");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("No listing cards found on the page.");
+                        Console.WriteLine("No listing container found on the page.");
                     }
-                }
-                else
-                {
-                    Console.WriteLine("No listing container found on the page.");
-                }
-                ///pagination end
-                ///put export here instead after pagination working. That will collect all the records before exporting
+
+                    lastpage = doc.DocumentNode.SelectSingleNode(paginationNodeString) == null;
+                    if (!lastpage)
+                    {
+                        var nextPageNode = doc.DocumentNode.SelectSingleNode(paginationNodeString);
+                        var nextPageURLNode = nextPageNode.SelectSingleNode(".//a");
+                        string nextPageURL;
+
+                        if (nextPageURLNode != null)
+                        {
+                            // Extract the href attribute value (URL)
+                            nextPageURL = nextPageURLNode.GetAttributeValue("href", string.Empty);
+                            filteredUrl = nextPageURL;
+                        }                     
+                        //Navigate to next page of results
+                        //Add 1000 ms delay here to prevent ban detection
+                        await Task.Delay(1000);
+                    }
+                } while (!lastpage);
+                ExportToExcel(scrapedData, filePath + "\\ScrapedData.xlsx", roomsInput);
             }
             catch (HttpRequestException ex)
             {
@@ -226,7 +231,7 @@ class Program
 
                 row++;
             }
-            //Calculate the average price
+
             decimal averagePrice = CalculateAveragePrice(data);
             //Insert the average price in the last cell
             worksheet.Cells[row, 1].Value = "Average Price";
