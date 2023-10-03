@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.IO;
 
 namespace WebScraper
 {
@@ -19,12 +20,37 @@ namespace WebScraper
         public string locationInput;
         public string locationKey;
         public string roomsFilter;
-        public string filePath = "C:\\Users\\Flip\\Downloads";
+        public string filePath;
         public WebScraperGUI()
         {
             InitializeComponent();
             locationCombobox.Validating += locationCombobox_Validating;
             goButton.Enabled = false;
+        }
+
+        private string GetFilePath()
+        {
+            string customFolderName = "ScrapedData";
+
+            // Get the path to the user's Documents directory
+            string documentsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            // Combine the Documents directory and custom folder name to create the full path
+            string customFolderPath = Path.Combine(documentsDirectory, customFolderName);
+
+            // Ensure the custom folder exists; if not, create it
+            if (!Directory.Exists(customFolderPath))
+            {
+                Directory.CreateDirectory(customFolderPath);
+            }
+
+            // Specify the desired file name
+            string fileName = "ScrapedData" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx";
+
+            // Combine the custom folder path and file name to create the full path for saving the file
+            string fullPath = Path.Combine(customFolderPath, fileName);
+
+            return fullPath;
         }
 
         private void GUI_Load(object sender, EventArgs e)
@@ -95,7 +121,7 @@ namespace WebScraper
             {
                 try
                 {
-
+                    filePath = GetFilePath();
                     loadingLabel.Text = "Processing, Please Wait";
                     loadingGif.Visible = true;
                     loadingLabel.Visible = true;

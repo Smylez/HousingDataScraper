@@ -11,6 +11,7 @@ using static System.Net.WebRequestMethods;
 using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace WebScraper
 {
@@ -20,7 +21,6 @@ namespace WebScraper
         {
             Application.Run(new WebScraper.WebScraperGUI());
         }
-
 
         public static async Task RunWebScraper(string[] args)
         {
@@ -172,7 +172,7 @@ namespace WebScraper
                             await Task.Delay(1000);
                         }
                     } while (!lastpage);
-                    ExportToExcel(scrapedData, filePath + "\\ScrapedData.xlsx", roomsInput);
+                    ExportToExcel(scrapedData, filePath, roomsInput);
                 }
                 catch (HttpRequestException ex)
                 {
