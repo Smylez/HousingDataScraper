@@ -82,7 +82,7 @@
             // loadingGif
             // 
             this.loadingGif.Image = ((System.Drawing.Image)(resources.GetObject("loadingGif.Image")));
-            this.loadingGif.Location = new System.Drawing.Point(200, 146);
+            this.loadingGif.Location = new System.Drawing.Point(178, 152);
             this.loadingGif.Name = "loadingGif";
             this.loadingGif.Size = new System.Drawing.Size(222, 203);
             this.loadingGif.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -94,11 +94,11 @@
             // 
             this.loadingLabel.AutoSize = true;
             this.loadingLabel.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.loadingLabel.Location = new System.Drawing.Point(270, 118);
+            this.loadingLabel.Location = new System.Drawing.Point(204, 124);
             this.loadingLabel.Name = "loadingLabel";
-            this.loadingLabel.Size = new System.Drawing.Size(80, 25);
+            this.loadingLabel.Size = new System.Drawing.Size(186, 25);
             this.loadingLabel.TabIndex = 7;
-            this.loadingLabel.Text = "Loading";
+            this.loadingLabel.Text = "Loading Please Wait.";
             // 
             // WebScraperGUI
             // 

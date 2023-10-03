@@ -144,6 +144,7 @@
   <ItemGroup>
     <EmbeddedResource Include="WebScraperGUI.resx">
       <DependentUpon>WebScraperGUI.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Locations.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -96,7 +96,7 @@ namespace WebScraper
                 try
                 {
 
-                    loadingLabel.Text = "Processing...";
+                    loadingLabel.Text = "Processing, Please Wait";
                     loadingGif.Visible = true;
                     loadingLabel.Visible = true;
                     // Disable the Go button to prevent multiple clicks during processing
