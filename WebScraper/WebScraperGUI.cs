@@ -83,7 +83,7 @@ namespace WebScraper
             locationCombobox.DisplayMember = "DisplayText";
             locationCombobox.ValueMember = "Value";
 
-            roomsFilterCombobox.Items.AddRange(new string[] { "N/A", "Bachelor", "1", "2", "3", "4" });
+            roomsFilterCombobox.Items.AddRange(new string[] { "All", "Bachelor", "1", "2", "3", "4" });
 
             loadingGif.Visible = false;
             loadingLabel.Visible = false;
